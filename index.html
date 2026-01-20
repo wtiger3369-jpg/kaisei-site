@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>KAISEI CONSTRUCTION | 내부 관리 시스템</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Consolas", "Pretendard", monospace;
+      background: #020617;
+      color: #e5e7eb;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ---------- LOGIN ---------- */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: radial-gradient(circle at top, #052e16, #020617);
+    }
+
+    .login-box {
+      background: #020617;
+      border: 1px solid #14532d;
+      padding: 40px;
+      width: 380px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+
+    .login-box h1 { font-size: 1.4rem; margin-bottom: 8px; color:#4ade80; }
+    .login-box p { font-size: .85rem; color: #86efac; margin-bottom: 24px; }
+
+    .login-box input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #14532d;
+      background: #020617;
+      color: #4ade80;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background: #15803d;
+      border: none;
+      border-radius: 6px;
+      color: #ecfdf5;
+      cursor: pointer;
+    }
+
+    /* ---------- TERMINAL AUTH ---------- */
+    .terminal {
+      position: fixed;
+      inset: 0;
+      background: black;
+      color: #4ade80;
+      padding: 30px;
+      font-size: 0.9rem;
+      display: none;
+      overflow-y: auto;
+      white-space: pre-line;
+    }
+
+    /* ---------- DASHBOARD LAYOUT ---------- */
+    .dashboard {
+      display: none;
+      grid-template-columns: 260px 1fr;
+      height: 100vh;
+    }
+
+    aside {
+      background: #020617;
+      border-right: 1px solid #1e293b;
+      padding: 24px;
+    }
+
+    .logo { font-weight: 800; margin-bottom: 32px; letter-spacing: 1px; }
+
+    .menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: transparent;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      color: #cbd5f5;
+      cursor: pointer;
+    }
+
+    .menu button:hover { background: #020617; color: #fff; }
+
+    main { padding: 32px; overflow-y: auto; }
+    h2 { margin-bottom: 16px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { border-bottom: 1px solid #1e293b; padding: 8px; text-align: left; }
+    th { color: #94a3b8; }
+
+    tr.secret { cursor: pointer; background: rgba(74,222,128,0.08); }
+    tr.secret:hover { background: rgba(74,222,128,0.18); }
+
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login">
+  <div class="login-box">
+    <h1>KAISEI CONSTRUCTION</h1>
+    <p>SECURE ACCESS TERMINAL</p>
+    <input type="password" placeholder="ACCESS CODE" />
+    <button onclick="enterSystem()">AUTHENTICATE</button>
+  </div>
+</div>
+
+<!-- TERMINAL -->
+<div class="terminal" id="terminal"></div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+
+  <aside>
+    <div class="logo">KAISEI CONSTRUCTION</div>
+    <div class="menu">
+      <button onclick="show('overview')">📊 현황</button>
+      <button onclick="show('projects')">🏗 프로젝트</button>
+      <button onclick="show('personnel')">👤 인원</button>
+      <button onclick="show('security')">🔒 보안</button>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h2>운영 현황</h2>
+      <div class="grid">
+        <div class="card"><h3>가동 공장</h3><p>12개</p></div>
+        <div class="card"><h3>활성 프로젝트</h3><p>10건</p></div>
+        <div class="card"><h3>설비 가동률</h3><p>96%</p></div>
+        <div class="card"><h3>내부 경고</h3><p>0건</p></div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" style="display:none">
+      <h2>프로젝트 목록</h2>
+      <table>
+        <tr><th>코드</th><th>위치</th><th>명</th></tr>
+        <tr><td>RX-A17</td><td>공업지대</td><td>사쿠라 중공업</td></tr>
+        <tr><td>QF-9X</td><td>공업지대</td><td>후지야마 정밀</td></tr>
+        <tr><td>LM-204</td><td>공업지대</td><td>아오이 전기제작소</td></tr>
+        <tr><td>NT-77B</td><td>공업지대</td><td>미나토 기계공업</td></tr>
+        <tr><td>VX-Δ3</td><td>공업지대</td><td>호시노 자동화</td></tr>
+        <tr><td>HZ-88R</td><td>공업지대</td><td>토키와 금속</td></tr>
+        <tr><td>PL-0M</td><td>공업지대</td><td>카스미 화학플랜트</td></tr>
+        <tr><td>CR-Σ1</td><td>공업지대</td><td>시라누이 에너지</td></tr>
+        <tr><td>AX-991</td><td>공업지대</td><td>히카리 로보틱스</td></tr>
+
+        <!-- SECRET PROJECT -->
+        <tr class="secret" onclick="openSecret()">
+          <td>MN-001</td><td>공업지대</td><td>안달모터즈</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- PERSONNEL -->
+    <section id="personnel" style="display:none">
+      <h2>핵심 인원</h2>
+      <div class="grid">
+        <div class="card"><h3>대표이사</h3><p>카이세이 류이치 (皆成 隆一)</p></div>
+        <div class="card"><h3>기술총괄</h3><p>타치바나 소라 (橘 空)</p></div>
+        <div class="card"><h3>보안책임</h3><p>쿠로다 미사키 (黒田 美咲)</p></div>
+        <div class="card"><h3>공정관리</h3><p>이시카와 렌 (石川 蓮)</p></div>
+      </div>
+    </section>
+
+    <!-- SECURITY -->
+    <section id="security" style="display:none">
+      <h2>보안 로그</h2>
+      <table>
+        <tr><th>시간</th><th>구역</th><th>이벤트</th></tr>
+        <tr><td>09:12</td><td>MN-001</td><td>권한 확인 요청</td></tr>
+        <tr><td>03:44</td><td>PL-0M</td><td>전력 변동 감지</td></tr>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const terminal = document.getElementById('terminal');
+
+  function runTerminal(lines, callback) {
+    terminal.style.display = 'block';
+    terminal.textContent = '';
+
+    let i = 0;
+    const timer = setInterval(() => {
+      terminal.textContent += lines[i] + '\n';
+      terminal.scrollTop = terminal.scrollHeight;
+      i++;
+      if (i >= lines.length) {
+        clearInterval(timer);
+        setTimeout(callback, 800);
+      }
+    }, 300);
+  }
+
+  /* FIRST LOGIN PASSWORD */
+  function enterSystem() {
+    const pw = document.querySelector('#login input').value;
+    if (pw !== 'kaisei') return alert('ACCESS DENIED');
+
+    document.getElementById('login').style.display = 'none';
+
+    runTerminal([
+      '>> 시스템 무결성 확인...',
+      '>> 사용자 키 인증 중...',
+      '>> 데이터 링크 동기화...',
+      '>> 접근 권한 확인 완료',
+      '>> 입장 승인'
+    ], () => {
+      terminal.style.display = 'none';
+      document.getElementById('dashboard').style.display = 'grid';
+    });
+  }
+
+  function show(id) {
+    document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+
+  /* SECRET PROJECT PASSWORD */
+  function openSecret() {
+    const pw = prompt('MN-001 ACCESS CODE');
+    if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
+
+    runTerminal([
+      '>> MN-001 보안 모듈 활성화...',
+      '>> 2차 인증 토큰 검증...',
+      '>> 내부 격리 구역 연결...',
+      '>> 암호 해제 완료',
+      '>> 접근 승인'
+    ], () => {
+      // 🔒 비밀 이미지 뷰어 오버레이
+      const viewer = document.createElement('div');
+      viewer.style.position = 'fixed';
+      viewer.style.inset = '0';
+      viewer.style.background = 'rgba(0,0,0,0.95)';
+      viewer.style.display = 'flex';
+      viewer.style.flexDirection = 'column';
+      viewer.style.alignItems = 'center';
+      viewer.style.justifyContent = 'center';
+      viewer.style.zIndex = '9999';
+
+      const title = document.createElement('div');
+      title.textContent = 'CONFIDENTIAL IMAGE — ANDAL MOTORS';
+      title.style.color = '#4ade80';
+      title.style.marginBottom = '12px';
+      title.style.fontSize = '18px';
+
+      const img = document.createElement('img');
+      // ✅ 아래 URL을 원하는 이미지 주소로 교체하면 됩니다
+      img.src = 'MAP･전체지도.png';
+      img.style.maxWidth = '90%';
+      img.style.maxHeight = '70%';
+      img.style.border = '2px solid #4ade80';
+      img.style.borderRadius = '6px';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '닫기';
+      closeBtn.style.marginTop = '14px';
+      closeBtn.style.padding = '8px 16px';
+      closeBtn.style.background = '#15803d';
+      closeBtn.style.border = 'none';
+      closeBtn.style.borderRadius = '6px';
+      closeBtn.style.color = '#ecfdf5';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.onclick = () => viewer.remove();
+
+      viewer.appendChild(title);
+      viewer.appendChild(img);
+      viewer.appendChild(closeBtn);
+      document.body.appendChild(viewer);
+    });
+  }
+</script>
+
+</body>
+</html>
