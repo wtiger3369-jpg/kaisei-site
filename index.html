@@ -253,43 +253,80 @@
     const pw = prompt('MN-001 ACCESS CODE');
     if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
-    const second = prompt('SECONDARY CODE');
-    if (second !== 'mahoroba') return alert('ACCESS DENIED');
-
-    startHackCountdown();
+    startHackGame();
   }
 
-  /* 3 MINUTE HACK SCREEN */
-  function startHackCountdown(){
-    const screen = document.createElement('div');
-    screen.style.position = 'fixed';
-    screen.style.inset = '0';
-    screen.style.background = 'black';
-    screen.style.color = '#4ade80';
-    screen.style.display = 'flex';
-    screen.style.alignItems = 'center';
-    screen.style.justifyContent = 'center';
-    screen.style.fontSize = '48px';
-    screen.style.fontFamily = 'monospace';
-    screen.style.zIndex = '9999';
+  /* ---------------- HACKING MINI GAME ---------------- */
+  const target = ['m','a','h','o','r','o','b','a'];
+  let progress = 0;
+  let timerInterval;
 
-    document.body.appendChild(screen);
+  function startHackGame() {
+    const game = document.createElement('div');
+    game.id = 'hackgame';
+    game.style.position = 'fixed';
+    game.style.inset = '0';
+    game.style.background = 'black';
+    game.style.color = '#4ade80';
+    game.style.display = 'flex';
+    game.style.flexDirection = 'column';
+    game.style.alignItems = 'center';
+    game.style.justifyContent = 'center';
+    game.style.fontFamily = 'Consolas, monospace';
+    game.style.zIndex = '9999';
 
-    let time = 180; // 3 minutes
+    const timer = document.createElement('div');
+    timer.style.fontSize = '28px';
+    timer.style.marginBottom = '20px';
 
-    const timer = setInterval(()=>{
-      const m = String(Math.floor(time/60)).padStart(2,'0');
-      const s = String(time%60).padStart(2,'0');
-      screen.textContent = `DECRYPTING ${m}:${s}`;
+    const lines = document.createElement('div');
+    lines.style.fontSize = '32px';
+    lines.style.letterSpacing = '12px';
+    lines.style.textAlign = 'center';
 
-      if(time <= 0){
-        clearInterval(timer);
-        screen.textContent = 'ACCESS GRANTED';
-        setTimeout(()=> screen.remove(), 2000);
-      }
+    game.appendChild(timer);
+    game.appendChild(lines);
+    document.body.appendChild(game);
 
-      time--;
+    let timeLeft = 180; // 3 minutes
+    timerInterval = setInterval(() => {
+      const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
+      const s = String(timeLeft%60).padStart(2,'0');
+      timer.textContent = `${m}:${s}`;
+      timeLeft--;
+      if(timeLeft < 0){ clearInterval(timerInterval); alert('TIME OVER'); game.remove(); }
     },1000);
+
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
+    function updateLines(){
+      let html='';
+      for(let i=0;i<8;i++){
+        let row='';
+        for(let j=0;j<20;j++){
+          const letter = alphabet[Math.floor(Math.random()*alphabet.length)];
+          if(letter===target[progress]){
+            row += `<span style="color:#22c55e">${letter}</span>`;
+          } else row += letter;
+        }
+        html += row + '<br>';
+      }
+      lines.innerHTML = html;
+    }
+
+    updateLines();
+    setInterval(updateLines, 200);
+
+    window.addEventListener('keydown', (e)=>{
+      if(e.key.toLowerCase() === target[progress]){
+        progress++;
+        if(progress >= target.length){
+          clearInterval(timerInterval);
+          lines.innerHTML = '<h1 style="color:#4ade80">ACCESS GRANTED</h1>';
+          setTimeout(()=>game.remove(),2000);
+        }
+      }
+    });
   }
 </script>
 
