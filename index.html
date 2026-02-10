@@ -263,87 +263,89 @@
   if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
   // 게임 오버레이
-  const game = document.createElement('div');
-  game.style.position = 'fixed';
-  game.style.inset = '0';
-  game.style.background = 'black';
-  game.style.display = 'flex';
-  game.style.flexDirection = 'column';
-  game.style.alignItems = 'center';
-  game.style.justifyContent = 'center';
-  game.style.zIndex = '9999';
-  game.style.color = '#4ade80';
-  game.style.fontSize = '28px';
-  game.style.fontFamily = 'monospace';
+const game = document.createElement('div');
+game.style.position = 'fixed';
+game.style.inset = '0';
+game.style.background = 'black';
+game.style.display = 'flex';
+game.style.flexDirection = 'column';
+game.style.alignItems = 'center';
+game.style.justifyContent = 'center';
+game.style.zIndex = '9999';
+game.style.color = '#4ade80';
+game.style.fontFamily = 'monospace';
 
-  const target = "mahoroba";
-  let index = 0;
+document.body.appendChild(game);
 
-  const rows = [];
+const target = "mahoroba";
+let index = 0;
 
-  // 8줄 생성
-  for (let i=0;i<8;i++){
-    const r = document.createElement('div');
-    r.textContent = randomRow();
-    r.style.margin = '6px';
-    rows.push(r);
-    game.appendChild(r);
-  }
+const ROWS = 8;
+const COLS = 10;
+const rows = [];
 
-  document.body.appendChild(game);
+const grid = document.createElement('div');
+grid.style.position = 'relative';
+game.appendChild(grid);
 
-  // 스캔라인 레이어
-const scan = document.createElement('div');
-scan.style.position = 'absolute';
-scan.style.inset = '0';
-scan.style.pointerEvents = 'none';
-scan.style.background = `
-repeating-linear-gradient(
-  to bottom,
-  rgba(0,255,0,0.08) 0px,
-  rgba(0,255,0,0.08) 2px,
-  transparent 2px,
-  transparent 6px
-)`;
-scan.style.animation = 'scanmove 6s linear infinite';
+// 판정선
+const line = document.createElement('div');
+line.style.position = 'absolute';
+line.style.top = '50%';
+line.style.left = '0';
+line.style.right = '0';
+line.style.height = '40px';
+line.style.marginTop = '-20px';
+line.style.border = '2px solid #3b82f6';
+grid.appendChild(line);
 
-game.appendChild(scan);
-
-  // 문자 회전
-  const spin = setInterval(()=>{
-    rows.forEach(r=>{
-      r.textContent = randomRow();
-    });
-  },120);
-
-  function randomRow(){
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let s="";
-    for(let i=0;i<12;i++){
-      s += letters[Math.floor(Math.random()*letters.length)];
-    }
-    return s;
-  }
-
-  // 키 입력
-  function press(e){
-    const key = e.key.toLowerCase();
-    if(key === target[index]){
-      index++;
-      if(index === target.length){
-        clearInterval(spin);
-        window.removeEventListener('keydown',press);
-        game.innerHTML = "<h1 style='color:#4ade80'>ACCESS GRANTED</h1>";
-        setTimeout(()=>{
-          game.remove();
-        },1200);
-      }
-    }
-  }
-
-  window.addEventListener('keydown',press);
+// 줄 생성
+for(let i=0;i<ROWS;i++){
+  const r = document.createElement('div');
+  r.style.fontSize = '32px';
+  r.style.letterSpacing = '12px';
+  r.style.height = '40px';
+  r.style.display = 'flex';
+  r.style.justifyContent = 'center';
+  r.style.alignItems = 'center';
+  grid.appendChild(r);
+  rows.push(r);
 }
-</script>
+
+function randRow(){
+  const s="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let t="";
+  for(let i=0;i<COLS;i++){
+    t += s[Math.floor(Math.random()*s.length)]+" ";
+  }
+  return t;
+}
+
+// 회전
+const spin = setInterval(()=>{
+  rows.forEach(r=> r.textContent = randRow());
+},120);
+
+// SPACE 판정
+function press(e){
+  if(e.code !== 'Space') return;
+
+  const mid = Math.floor(ROWS/2);
+  const letters = rows[mid].textContent.replace(/ /g,'').toLowerCase();
+
+  if(letters.includes(target[index])){
+    index++;
+  }
+
+  if(index === target.length){
+    clearInterval(spin);
+    window.removeEventListener('keydown',press);
+    game.innerHTML="<h1 style='color:#4ade80'>ACCESS GRANTED</h1>";
+    setTimeout(()=>game.remove(),1200);
+  }
+}
+
+window.addEventListener('keydown',press);
 
     runTerminal([
       '>> MN-001 보안 모듈 활성화...',
