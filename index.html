@@ -259,85 +259,86 @@
 
   /* SECRET PROJECT PASSWORD */
   function openSecret() {
-  const pw = prompt('MN-001 ACCESS CODE');
-  if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
+    const pw = prompt('MN-001 ACCESS CODE');
+    if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
-  // 게임 오버레이
+    // 게임 오버레이
 const game = document.createElement('div');
 game.style.position = 'fixed';
 game.style.inset = '0';
 game.style.background = 'black';
+game.style.color = '#4ade80';
 game.style.display = 'flex';
 game.style.flexDirection = 'column';
 game.style.alignItems = 'center';
 game.style.justifyContent = 'center';
-game.style.zIndex = '9999';
-game.style.color = '#4ade80';
 game.style.fontFamily = 'monospace';
-
+game.style.zIndex = '9999';
 document.body.appendChild(game);
 
-const target = "mahoroba";
-let index = 0;
+// 목표 숫자 4개 생성
+function randNum(){
+  return String(Math.floor(Math.random()*100)).padStart(2,'0');
+}
 
-const ROWS = 8;
-const COLS = 10;
+let target = [randNum(),randNum(),randNum(),randNum()];
+
+const targetBox = document.createElement('h1');
+targetBox.style.color = '#ff4444';
+targetBox.textContent = target.join(' ');
+game.appendChild(targetBox);
+
+// 숫자 그리드
 const rows = [];
+const ROWS = 8;
+const COLS = 12;
 
-const grid = document.createElement('div');
-grid.style.position = 'relative';
-game.appendChild(grid);
-
-// 판정선
-const line = document.createElement('div');
-line.style.position = 'absolute';
-line.style.top = '50%';
-line.style.left = '0';
-line.style.right = '0';
-line.style.height = '40px';
-line.style.marginTop = '-20px';
-line.style.border = '2px solid #3b82f6';
-grid.appendChild(line);
-
-// 줄 생성
 for(let i=0;i<ROWS;i++){
   const r = document.createElement('div');
-  r.style.fontSize = '32px';
-  r.style.letterSpacing = '12px';
-  r.style.height = '40px';
-  r.style.display = 'flex';
-  r.style.justifyContent = 'center';
-  r.style.alignItems = 'center';
-  grid.appendChild(r);
+  r.style.fontSize = '28px';
+  r.style.margin = '4px';
+  game.appendChild(r);
   rows.push(r);
 }
 
-function randRow(){
-  const s="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let t="";
-  for(let i=0;i<COLS;i++){
-    t += s[Math.floor(Math.random()*s.length)]+" ";
-  }
-  return t;
+function randomRow(){
+  let s=[];
+  for(let i=0;i<COLS;i++) s.push(randNum());
+  return s;
 }
+
+let gridData = [];
 
 // 회전
 const spin = setInterval(()=>{
-  rows.forEach(r=> r.textContent = randRow());
-},120);
+  gridData = [];
+  rows.forEach((r,i)=>{
+    const data = randomRow();
+    gridData.push(data);
+    r.textContent = data.join(' ');
+  });
+},150);
 
-// SPACE 판정
+// Space 판정
 function press(e){
   if(e.code !== 'Space') return;
 
-  const mid = Math.floor(ROWS/2);
-  const letters = rows[mid].textContent.replace(/ /g,'').toLowerCase();
+  let found = false;
 
-  if(letters.includes(target[index])){
-    index++;
+  for(const row of gridData){
+    for(let i=0;i<row.length-3;i++){
+      if(
+        row[i]==target[0] &&
+        row[i+1]==target[1] &&
+        row[i+2]==target[2] &&
+        row[i+3]==target[3]
+      ){
+        found = true;
+      }
+    }
   }
 
-  if(index === target.length){
+  if(found){
     clearInterval(spin);
     window.removeEventListener('keydown',press);
     game.innerHTML="<h1 style='color:#4ade80'>ACCESS GRANTED</h1>";
