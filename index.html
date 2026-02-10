@@ -125,7 +125,27 @@
     tr.secret { cursor: pointer; background: rgba(74,222,128,0.08); }
     tr.secret:hover { background: rgba(74,222,128,0.18); }
 
-  </style>
+    /* HACK SCREEN */
+  .hack-screen{
+    position:fixed;
+    inset:0;
+    background:black;
+    color:#4ade80;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    font-family:Consolas,monospace;
+    z-index:9999;
+  }
+  .hack-text{
+    font-size:1.4rem;
+    margin-bottom:20px;
+    animation: blink 1s infinite;
+  }
+  @keyframes blink{50%{opacity:.4}}
+
+</style>
 </head>
 <body>
 
@@ -217,39 +237,10 @@
 <script>
   const terminal = document.getElementById('terminal');
 
-  function runTerminal(lines, callback) {
-    terminal.style.display = 'block';
-    terminal.textContent = '';
-
-    let i = 0;
-    const timer = setInterval(() => {
-      terminal.textContent += lines[i] + '\n';
-      terminal.scrollTop = terminal.scrollHeight;
-      i++;
-      if (i >= lines.length) {
-        clearInterval(timer);
-        setTimeout(callback, 800);
-      }
-    }, 300);
-  }
-
-  /* FIRST LOGIN PASSWORD */
-  function enterSystem() {
-    const pw = document.querySelector('#login input').value;
-    if (pw !== 'kaisei') return alert('ACCESS DENIED');
-
+  /* LOGIN */
+  function enterSystem(){
     document.getElementById('login').style.display = 'none';
-
-    runTerminal([
-      '>> 시스템 무결성 확인...',
-      '>> 사용자 키 인증 중...',
-      '>> 데이터 링크 동기화...',
-      '>> 접근 권한 확인 완료',
-      '>> 입장 승인'
-    ], () => {
-      terminal.style.display = 'none';
-      document.getElementById('dashboard').style.display = 'grid';
-    });
+    document.getElementById('dashboard').style.display = 'grid';
   }
 
   function show(id) {
@@ -262,54 +253,43 @@
     const pw = prompt('MN-001 ACCESS CODE');
     if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
-    runTerminal([
-      '>> MN-001 보안 모듈 활성화...',
-      '>> 2차 인증 토큰 검증...',
-      '>> 내부 격리 구역 연결...',
-      '>> 암호 해제 완료',
-      '>> 접근 승인'
-    ], () => {
-      // 🔒 비밀 이미지 뷰어 오버레이
-      const viewer = document.createElement('div');
-      viewer.style.position = 'fixed';
-      viewer.style.inset = '0';
-      viewer.style.background = 'rgba(0,0,0,0.95)';
-      viewer.style.display = 'flex';
-      viewer.style.flexDirection = 'column';
-      viewer.style.alignItems = 'center';
-      viewer.style.justifyContent = 'center';
-      viewer.style.zIndex = '9999';
+    const second = prompt('SECONDARY CODE');
+    if (second !== 'mahoroba') return alert('ACCESS DENIED');
 
-      const title = document.createElement('div');
-      title.textContent = 'CONFIDENTIAL IMAGE — ANDAL MOTORS';
-      title.style.color = '#4ade80';
-      title.style.marginBottom = '12px';
-      title.style.fontSize = '18px';
+    startHackCountdown();
+  }
 
-      const img = document.createElement('img');
-      // ✅ 아래 URL을 원하는 이미지 주소로 교체하면 됩니다
-      img.src = 'MAP･전체지도.png';
-      img.style.maxWidth = '90%';
-      img.style.maxHeight = '70%';
-      img.style.border = '2px solid #4ade80';
-      img.style.borderRadius = '6px';
+  /* 3 MINUTE HACK SCREEN */
+  function startHackCountdown(){
+    const screen = document.createElement('div');
+    screen.style.position = 'fixed';
+    screen.style.inset = '0';
+    screen.style.background = 'black';
+    screen.style.color = '#4ade80';
+    screen.style.display = 'flex';
+    screen.style.alignItems = 'center';
+    screen.style.justifyContent = 'center';
+    screen.style.fontSize = '48px';
+    screen.style.fontFamily = 'monospace';
+    screen.style.zIndex = '9999';
 
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '닫기';
-      closeBtn.style.marginTop = '14px';
-      closeBtn.style.padding = '8px 16px';
-      closeBtn.style.background = '#15803d';
-      closeBtn.style.border = 'none';
-      closeBtn.style.borderRadius = '6px';
-      closeBtn.style.color = '#ecfdf5';
-      closeBtn.style.cursor = 'pointer';
-      closeBtn.onclick = () => viewer.remove();
+    document.body.appendChild(screen);
 
-      viewer.appendChild(title);
-      viewer.appendChild(img);
-      viewer.appendChild(closeBtn);
-      document.body.appendChild(viewer);
-    });
+    let time = 180; // 3 minutes
+
+    const timer = setInterval(()=>{
+      const m = String(Math.floor(time/60)).padStart(2,'0');
+      const s = String(time%60).padStart(2,'0');
+      screen.textContent = `DECRYPTING ${m}:${s}`;
+
+      if(time <= 0){
+        clearInterval(timer);
+        screen.textContent = 'ACCESS GRANTED';
+        setTimeout(()=> screen.remove(), 2000);
+      }
+
+      time--;
+    },1000);
   }
 </script>
 
