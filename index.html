@@ -125,27 +125,7 @@
     tr.secret { cursor: pointer; background: rgba(74,222,128,0.08); }
     tr.secret:hover { background: rgba(74,222,128,0.18); }
 
-    /* HACK SCREEN */
-  .hack-screen{
-    position:fixed;
-    inset:0;
-    background:black;
-    color:#4ade80;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    font-family:Consolas,monospace;
-    z-index:9999;
-  }
-  .hack-text{
-    font-size:1.4rem;
-    margin-bottom:20px;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink{50%{opacity:.4}}
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -237,10 +217,39 @@
 <script>
   const terminal = document.getElementById('terminal');
 
-  /* LOGIN */
-  function enterSystem(){
+  function runTerminal(lines, callback) {
+    terminal.style.display = 'block';
+    terminal.textContent = '';
+
+    let i = 0;
+    const timer = setInterval(() => {
+      terminal.textContent += lines[i] + '\n';
+      terminal.scrollTop = terminal.scrollHeight;
+      i++;
+      if (i >= lines.length) {
+        clearInterval(timer);
+        setTimeout(callback, 800);
+      }
+    }, 300);
+  }
+
+  /* FIRST LOGIN PASSWORD */
+  function enterSystem() {
+    const pw = document.querySelector('#login input').value;
+    if (pw !== 'kaisei') return alert('ACCESS DENIED');
+
     document.getElementById('login').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'grid';
+
+    runTerminal([
+      '>> 시스템 무결성 확인...',
+      '>> 사용자 키 인증 중...',
+      '>> 데이터 링크 동기화...',
+      '>> 접근 권한 확인 완료',
+      '>> 입장 승인'
+    ], () => {
+      terminal.style.display = 'none';
+      document.getElementById('dashboard').style.display = 'grid';
+    });
   }
 
   function show(id) {
@@ -250,92 +259,140 @@
 
   /* SECRET PROJECT PASSWORD */
   function openSecret() {
-    const pw = prompt('MN-001 ACCESS CODE');
-    if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
+  const pw = prompt('MN-001 ACCESS CODE');
+  if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
-    startMiniGame();
+  // 게임 오버레이
+  const game = document.createElement('div');
+  game.style.position = 'fixed';
+  game.style.inset = '0';
+  game.style.background = 'black';
+  game.style.display = 'flex';
+  game.style.flexDirection = 'column';
+  game.style.alignItems = 'center';
+  game.style.justifyContent = 'center';
+  game.style.zIndex = '9999';
+  game.style.color = '#4ade80';
+  game.style.fontSize = '28px';
+  game.style.fontFamily = 'monospace';
+
+  const target = "mahoroba";
+  let index = 0;
+
+  const rows = [];
+
+  // 8줄 생성
+  for (let i=0;i<8;i++){
+    const r = document.createElement('div');
+    r.textContent = randomRow();
+    r.style.margin = '6px';
+    rows.push(r);
+    game.appendChild(r);
   }
 
-  /* ===== MINI GAME ===== */
-  const targetLetters = ['m','a','h','o','r','o','b','a'];
-  let miniIndex = 0;
-  let activePos = 0;
-  let miniInterval;
+  document.body.appendChild(game);
 
-  function startMiniGame(){
-    const overlay = document.createElement('div');
-    overlay.id = 'miniGameOverlay';
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.background = 'black';
-    overlay.style.display = 'flex';
-    overlay.style.flexDirection = 'column';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.zIndex = '9999';
+  // 스캔라인 레이어
+const scan = document.createElement('div');
+scan.style.position = 'absolute';
+scan.style.inset = '0';
+scan.style.pointerEvents = 'none';
+scan.style.background = `
+repeating-linear-gradient(
+  to bottom,
+  rgba(0,255,0,0.08) 0px,
+  rgba(0,255,0,0.08) 2px,
+  transparent 2px,
+  transparent 6px
+)`;
+scan.style.animation = 'scanmove 6s linear infinite';
 
-    const linesWrap = document.createElement('div');
-    linesWrap.id = 'miniLines';
-    linesWrap.style.fontSize = '40px';
-    linesWrap.style.letterSpacing = '12px';
+game.appendChild(scan);
 
-    overlay.appendChild(linesWrap);
-    document.body.appendChild(overlay);
+  // 문자 회전
+  const spin = setInterval(()=>{
+    rows.forEach(r=>{
+      r.textContent = randomRow();
+    });
+  },120);
 
-    drawMiniLines();
-
-    miniInterval = setInterval(()=>{
-      activePos = (activePos + 1) % 8;
-      drawMiniLines();
-    }, 350);
-
-    window.addEventListener('keydown', miniKeyHandler);
-  }
-
-  function drawMiniLines(){
-    const wrap = document.getElementById('miniLines');
-    wrap.innerHTML = '';
-    for(let i=0;i<8;i++){
-      const span = document.createElement('span');
-      span.textContent = targetLetters[i].toUpperCase();
-      span.style.margin = '0 10px';
-      span.style.color = (i === activePos) ? '#22c55e' : '#1f2937';
-      wrap.appendChild(span);
+  function randomRow(){
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let s="";
+    for(let i=0;i<12;i++){
+      s += letters[Math.floor(Math.random()*letters.length)];
     }
+    return s;
   }
 
-  function miniKeyHandler(e){
-    if(e.key.toLowerCase() === targetLetters[miniIndex] && activePos === miniIndex){
-      miniIndex++;
-      if(miniIndex >= targetLetters.length){
-        finishMiniGame();
+  // 키 입력
+  function press(e){
+    const key = e.key.toLowerCase();
+    if(key === target[index]){
+      index++;
+      if(index === target.length){
+        clearInterval(spin);
+        window.removeEventListener('keydown',press);
+        game.innerHTML = "<h1 style='color:#4ade80'>ACCESS GRANTED</h1>";
+        setTimeout(()=>{
+          game.remove();
+        },1200);
       }
     }
   }
 
-  function finishMiniGame(){
-    clearInterval(miniInterval);
-    window.removeEventListener('keydown', miniKeyHandler);
-    document.getElementById('miniGameOverlay').remove();
+  window.addEventListener('keydown',press);
+}
+</script>
 
-    // 성공 후 이미지 표시
-    const viewer = document.createElement('div');
-    viewer.style.position = 'fixed';
-    viewer.style.inset = '0';
-    viewer.style.background = 'rgba(0,0,0,0.95)';
-    viewer.style.display = 'flex';
-    viewer.style.flexDirection = 'column';
-    viewer.style.alignItems = 'center';
-    viewer.style.justifyContent = 'center';
-    viewer.style.zIndex = '9999';
+    runTerminal([
+      '>> MN-001 보안 모듈 활성화...',
+      '>> 2차 인증 토큰 검증...',
+      '>> 내부 격리 구역 연결...',
+      '>> 암호 해제 완료',
+      '>> 접근 승인'
+    ], () => {
+      // 🔒 비밀 이미지 뷰어 오버레이
+      const viewer = document.createElement('div');
+      viewer.style.position = 'fixed';
+      viewer.style.inset = '0';
+      viewer.style.background = 'rgba(0,0,0,0.95)';
+      viewer.style.display = 'flex';
+      viewer.style.flexDirection = 'column';
+      viewer.style.alignItems = 'center';
+      viewer.style.justifyContent = 'center';
+      viewer.style.zIndex = '9999';
 
-    const img = document.createElement('img');
-    img.src = 'MAP･전체지도.png';
-    img.style.maxWidth = '90%';
-    img.style.maxHeight = '80%';
+      const title = document.createElement('div');
+      title.textContent = 'CONFIDENTIAL IMAGE — ANDAL MOTORS';
+      title.style.color = '#4ade80';
+      title.style.marginBottom = '12px';
+      title.style.fontSize = '18px';
 
-    viewer.appendChild(img);
-    document.body.appendChild(viewer);
+      const img = document.createElement('img');
+      // ✅ 아래 URL을 원하는 이미지 주소로 교체하면 됩니다
+      img.src = 'MAP･전체지도.png';
+      img.style.maxWidth = '90%';
+      img.style.maxHeight = '70%';
+      img.style.border = '2px solid #4ade80';
+      img.style.borderRadius = '6px';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '닫기';
+      closeBtn.style.marginTop = '14px';
+      closeBtn.style.padding = '8px 16px';
+      closeBtn.style.background = '#15803d';
+      closeBtn.style.border = 'none';
+      closeBtn.style.borderRadius = '6px';
+      closeBtn.style.color = '#ecfdf5';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.onclick = () => viewer.remove();
+
+      viewer.appendChild(title);
+      viewer.appendChild(img);
+      viewer.appendChild(closeBtn);
+      document.body.appendChild(viewer);
+    });
   }
 </script>
 
