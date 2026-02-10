@@ -253,80 +253,89 @@
     const pw = prompt('MN-001 ACCESS CODE');
     if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
 
-    startHackGame();
+    startMiniGame();
   }
 
-  /* ---------------- HACKING MINI GAME ---------------- */
-  const target = ['m','a','h','o','r','o','b','a'];
-  let progress = 0;
-  let timerInterval;
+  /* ===== MINI GAME ===== */
+  const targetLetters = ['m','a','h','o','r','o','b','a'];
+  let miniIndex = 0;
+  let activePos = 0;
+  let miniInterval;
 
-  function startHackGame() {
-    const game = document.createElement('div');
-    game.id = 'hackgame';
-    game.style.position = 'fixed';
-    game.style.inset = '0';
-    game.style.background = 'black';
-    game.style.color = '#4ade80';
-    game.style.display = 'flex';
-    game.style.flexDirection = 'column';
-    game.style.alignItems = 'center';
-    game.style.justifyContent = 'center';
-    game.style.fontFamily = 'Consolas, monospace';
-    game.style.zIndex = '9999';
+  function startMiniGame(){
+    const overlay = document.createElement('div');
+    overlay.id = 'miniGameOverlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'black';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '9999';
 
-    const timer = document.createElement('div');
-    timer.style.fontSize = '28px';
-    timer.style.marginBottom = '20px';
+    const linesWrap = document.createElement('div');
+    linesWrap.id = 'miniLines';
+    linesWrap.style.fontSize = '40px';
+    linesWrap.style.letterSpacing = '12px';
 
-    const lines = document.createElement('div');
-    lines.style.fontSize = '32px';
-    lines.style.letterSpacing = '12px';
-    lines.style.textAlign = 'center';
+    overlay.appendChild(linesWrap);
+    document.body.appendChild(overlay);
 
-    game.appendChild(timer);
-    game.appendChild(lines);
-    document.body.appendChild(game);
+    drawMiniLines();
 
-    let timeLeft = 180; // 3 minutes
-    timerInterval = setInterval(() => {
-      const m = String(Math.floor(timeLeft/60)).padStart(2,'0');
-      const s = String(timeLeft%60).padStart(2,'0');
-      timer.textContent = `${m}:${s}`;
-      timeLeft--;
-      if(timeLeft < 0){ clearInterval(timerInterval); alert('TIME OVER'); game.remove(); }
-    },1000);
+    miniInterval = setInterval(()=>{
+      activePos = (activePos + 1) % 8;
+      drawMiniLines();
+    }, 350);
 
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    window.addEventListener('keydown', miniKeyHandler);
+  }
 
-    function updateLines(){
-      let html='';
-      for(let i=0;i<8;i++){
-        let row='';
-        for(let j=0;j<20;j++){
-          const letter = alphabet[Math.floor(Math.random()*alphabet.length)];
-          if(letter===target[progress]){
-            row += `<span style="color:#22c55e">${letter}</span>`;
-          } else row += letter;
-        }
-        html += row + '<br>';
-      }
-      lines.innerHTML = html;
+  function drawMiniLines(){
+    const wrap = document.getElementById('miniLines');
+    wrap.innerHTML = '';
+    for(let i=0;i<8;i++){
+      const span = document.createElement('span');
+      span.textContent = targetLetters[i].toUpperCase();
+      span.style.margin = '0 10px';
+      span.style.color = (i === activePos) ? '#22c55e' : '#1f2937';
+      wrap.appendChild(span);
     }
+  }
 
-    updateLines();
-    setInterval(updateLines, 200);
-
-    window.addEventListener('keydown', (e)=>{
-      if(e.key.toLowerCase() === target[progress]){
-        progress++;
-        if(progress >= target.length){
-          clearInterval(timerInterval);
-          lines.innerHTML = '<h1 style="color:#4ade80">ACCESS GRANTED</h1>';
-          setTimeout(()=>game.remove(),2000);
-        }
+  function miniKeyHandler(e){
+    if(e.key.toLowerCase() === targetLetters[miniIndex] && activePos === miniIndex){
+      miniIndex++;
+      if(miniIndex >= targetLetters.length){
+        finishMiniGame();
       }
-    });
+    }
+  }
+
+  function finishMiniGame(){
+    clearInterval(miniInterval);
+    window.removeEventListener('keydown', miniKeyHandler);
+    document.getElementById('miniGameOverlay').remove();
+
+    // 성공 후 이미지 표시
+    const viewer = document.createElement('div');
+    viewer.style.position = 'fixed';
+    viewer.style.inset = '0';
+    viewer.style.background = 'rgba(0,0,0,0.95)';
+    viewer.style.display = 'flex';
+    viewer.style.flexDirection = 'column';
+    viewer.style.alignItems = 'center';
+    viewer.style.justifyContent = 'center';
+    viewer.style.zIndex = '9999';
+
+    const img = document.createElement('img');
+    img.src = 'MAP･전체지도.png';
+    img.style.maxWidth = '90%';
+    img.style.maxHeight = '80%';
+
+    viewer.appendChild(img);
+    document.body.appendChild(viewer);
   }
 </script>
 
