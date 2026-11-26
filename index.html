@@ -1,317 +1,425 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>KAISEI CONSTRUCTION | 내부 관리 시스템</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>카이세이 연구소 관리시스템</title>
+<meta name="description" content="카이세이 응용소재연구소 연구과제 및 시설 관리시스템" />
+<style>
+:root{--blue:#1a4f9c;--navy:#0f2f5f;--ink:#1f2933;--muted:#667085;--line:#d9dfe7;--bg:#f4f6f9;--sans:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:#fff;line-height:1.6;font-size:15px}
+a{color:inherit;text-decoration:none}ul{list-style:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.w{width:min(1120px,94%);margin-inline:auto}
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== PORTAL ===== */
+#site{min-height:100vh;display:flex;flex-direction:column}
+.util{background:var(--navy);color:#cbd8ee;font-size:.8rem}
+.util .w{display:flex;justify-content:flex-end;gap:18px;padding:6px 0}
+header.gnb{border-bottom:1px solid var(--line);position:relative;background:#fff;z-index:5}
+header.gnb .w{display:flex;align-items:center;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;padding:14px 0;font-weight:800;font-size:1.05rem;color:var(--navy);white-space:nowrap}
+.logo i{width:34px;height:34px;border-radius:8px;background:var(--blue);color:#fff;display:grid;place-items:center;font-style:normal}
+.logo small{display:block;font-weight:500;font-size:.7rem;color:var(--muted)}
+ul.m{display:flex;flex:1;justify-content:space-around}
+ul.m>li{position:relative}
+ul.m>li>a{display:block;padding:24px 14px;font-weight:700}
+ul.m>li:hover>a{color:var(--blue);box-shadow:inset 0 -3px var(--blue)}
+ul.m ul{display:none;position:absolute;left:50%;transform:translateX(-50%);top:100%;background:#fff;border:1px solid var(--line);min-width:160px;padding:8px 0;box-shadow:0 8px 20px rgba(15,47,95,.12)}
+ul.m>li:hover ul,ul.m>li:focus-within ul{display:block}
+ul.m ul a{display:block;padding:7px 18px;font-size:.9rem;color:var(--muted)}
+ul.m ul a:hover{background:var(--bg);color:var(--blue)}
+.banner{background:linear-gradient(110deg,var(--navy),var(--blue));color:#fff;padding:56px 0}
+.banner h1{font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.3;max-width:20ch}
+.banner p{margin-top:12px;color:#d3e0f5;max-width:52ch}
+.banner .tag{display:inline-block;margin-bottom:14px;padding:3px 10px;border:1px solid #8fb0e3;border-radius:20px;font-size:.8rem}
+.quick{margin-top:-28px;position:relative}
+.quick ul{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,47,95,.1)}
+.quick li{padding:20px 12px;text-align:center;border-right:1px solid var(--line)}
+.quick li:last-child{border:none}
+.quick b{display:block;font-size:1.5rem}
+.quick span{font-weight:700;display:block}
+.quick small{color:var(--muted);font-size:.8rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:48px 0 16px}
+.box h2{font-size:1.15rem;padding-bottom:10px;border-bottom:2px solid var(--navy);display:flex;justify-content:space-between;align-items:baseline}
+.box h2 a{font-size:.8rem;color:var(--muted);font-weight:400}
+.box li{display:flex;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.box li a:hover{color:var(--blue);text-decoration:underline}
+.box time,.box em{color:var(--muted);font-size:.85rem;white-space:nowrap;font-style:normal}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:32px 0}
+.cards div{border:1px solid var(--line);border-radius:10px;padding:20px;background:var(--bg)}
+.cards h3{font-size:1rem;margin-bottom:6px;color:var(--navy)}
+.cards p{font-size:.85rem;color:var(--muted)}
+.stats{background:var(--bg);padding:36px 0;border-block:1px solid var(--line)}
+.stats .w{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:16px}
+.stats b{display:block;font-size:1.9rem;color:var(--blue)}
+.stats span{color:var(--muted);font-size:.85rem}
+footer.f{margin-top:auto;background:#2b3440;color:#aab4c2;font-size:.82rem;padding:28px 0}
+footer.f .w{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer.f p{margin-bottom:3px}
+footer.f .gate{background:none;border:none;font:inherit;color:#fff;cursor:pointer;padding:0;text-decoration:underline}
+.util .staff{margin-right:auto;background:#2f6fd0;color:#fff;border:none;font:inherit;font-weight:700;padding:2px 12px;border-radius:12px;cursor:pointer}
+.util .staff:hover{background:#4285e8}
+.banner .cta{margin-top:22px;padding:12px 24px;background:#fff;color:var(--navy);border:none;border-radius:6px;font:inherit;font-weight:800;cursor:pointer}
+.banner .cta:hover{background:#e6eefb}
 
-    body {
-      font-family: "Consolas", "Pretendard", monospace;
-      background: #020617;
-      color: #e5e7eb;
-      height: 100vh;
-      overflow: hidden;
-    }
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;background:rgba(10,18,24,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal.open{display:flex}
+.modal form{background:#fff;width:min(360px,100%);padding:26px;border-radius:8px}
+.modal h3{margin-bottom:4px}.modal p{color:var(--muted);font-size:.85rem;margin-bottom:14px}
+.modal input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font:inherit}
+.modal .err{color:#b3261e;min-height:1.4em;margin-top:8px;font-size:.85rem}
+.modal .row{display:flex;gap:8px;margin-top:10px}
+.modal button{flex:1;padding:10px;border-radius:4px;border:1px solid var(--line);background:#fff;font:inherit;cursor:pointer}
+.modal button.go{background:var(--blue);color:#fff;border-color:var(--blue)}
+.shake{animation:shake .3s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#terminal{position:fixed;inset:0;background:#000;color:#4ade80;padding:30px;font:.9rem/1.7 Consolas,monospace;display:none;overflow-y:auto;white-space:pre-line;z-index:60;cursor:pointer}
 
-    /* ---------- LOGIN ---------- */
-    .login-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: radial-gradient(circle at top, #052e16, #020617);
-    }
+/* ===== INTERNAL SYSTEM ===== */
+#system{display:none;grid-template-columns:230px 1fr;height:100vh;background:#020617;color:#e5e7eb;font-family:Consolas,var(--sans),monospace}
+#system aside{border-right:1px solid #1e293b;padding:24px;display:flex;flex-direction:column}
+#system .lg{font-weight:800;letter-spacing:1px;margin-bottom:26px;color:#4ade80}
+#system .menu button{display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;background:transparent;border:1px solid #1e293b;border-radius:6px;color:#cbd5f5;cursor:pointer;font:inherit}
+#system .menu button:hover{background:#0f172a;color:#fff}
+#system .menu button.on{border-color:#4ade80;color:#4ade80}
+#system .exit{margin-top:auto}
+#system main{padding:32px;overflow-y:auto}
+#system h2{margin-bottom:16px}#system h3{font-size:.9rem;color:#94a3b8;margin:24px 0 8px}
+#system .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+#system .card{border:1px solid #1e293b;border-radius:10px;padding:14px}
+#system .card h3{margin:0 0 4px}#system .card small{color:#94a3b8;display:block}
+#system .card p{font-size:1.1rem}
+#system .tw{overflow-x:auto}
+#system table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:560px}
+#system th,#system td{border-bottom:1px solid #1e293b;padding:8px;text-align:left}
+#system th{color:#94a3b8;font-weight:400}
+#system tr.secret{cursor:pointer;background:rgba(74,222,128,.08)}#system tr.secret:hover{background:rgba(74,222,128,.18)}
+#system section{display:none}#system section.on{display:block}
+.bar{display:inline-block;width:70px;height:6px;background:#1e293b;border-radius:3px;vertical-align:middle;margin-right:6px}
+.bar i{display:block;height:100%;background:#4ade80;border-radius:3px}
+.lv{padding:1px 8px;border-radius:10px;font-size:.78rem}
+.lv.정보{background:#0b2a4a;color:#7dd3fc}.lv.주의{background:#3b2f0b;color:#fcd34d}.lv.경고{background:#4a1414;color:#fca5a5}
+.st{color:#94a3b8}.st.진행{color:#4ade80}.st.점검{color:#fcd34d}.st.보류{color:#fca5a5}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:70;color:#4ade80;gap:14px}
+#viewer.open{display:flex}
+#viewer img{max-width:90%;max-height:70%;border:2px solid #4ade80;border-radius:6px}
+#viewer button{padding:8px 16px;background:#15803d;border:none;border-radius:6px;color:#ecfdf5;cursor:pointer}
 
-    .login-box {
-      background: #020617;
-      border: 1px solid #14532d;
-      padding: 40px;
-      width: 380px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
-    }
-
-    .login-box h1 { font-size: 1.4rem; margin-bottom: 8px; color:#4ade80; }
-    .login-box p { font-size: .85rem; color: #86efac; margin-bottom: 24px; }
-
-    .login-box input {
-      width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      border: 1px solid #14532d;
-      background: #020617;
-      color: #4ade80;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 10px;
-      background: #15803d;
-      border: none;
-      border-radius: 6px;
-      color: #ecfdf5;
-      cursor: pointer;
-    }
-
-    /* ---------- TERMINAL AUTH ---------- */
-    .terminal {
-      position: fixed;
-      inset: 0;
-      background: black;
-      color: #4ade80;
-      padding: 30px;
-      font-size: 0.9rem;
-      display: none;
-      overflow-y: auto;
-      white-space: pre-line;
-    }
-
-    /* ---------- DASHBOARD LAYOUT ---------- */
-    .dashboard {
-      display: none;
-      grid-template-columns: 260px 1fr;
-      height: 100vh;
-    }
-
-    aside {
-      background: #020617;
-      border-right: 1px solid #1e293b;
-      padding: 24px;
-    }
-
-    .logo { font-weight: 800; margin-bottom: 32px; letter-spacing: 1px; }
-
-    .menu button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      background: transparent;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      color: #cbd5f5;
-      cursor: pointer;
-    }
-
-    .menu button:hover { background: #020617; color: #fff; }
-
-    main { padding: 32px; overflow-y: auto; }
-    h2 { margin-bottom: 16px; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .card {
-      background: #020617;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 16px;
-    }
-
-    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-    th, td { border-bottom: 1px solid #1e293b; padding: 8px; text-align: left; }
-    th { color: #94a3b8; }
-
-    tr.secret { cursor: pointer; background: rgba(74,222,128,0.08); }
-    tr.secret:hover { background: rgba(74,222,128,0.18); }
-
-  </style>
+#hack{position:fixed;inset:0;background:#02110a;display:none;align-items:center;justify-content:center;z-index:55;color:#4ade80;font-family:Consolas,monospace;padding:16px}
+#hack.open{display:flex}
+.hbox{width:min(760px,100%);border:1px solid #14532d;padding:22px;border-radius:10px;background:#020617}
+.hh{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}
+.tb{height:6px;background:#0a2a18;border-radius:3px;margin-bottom:14px}.tb i{display:block;height:100%;background:#4ade80;width:100%;transition:width .1s linear}
+.hm{min-height:2.6em;font-size:.85rem;color:#86efac;margin-bottom:10px}
+.hm button{margin-left:10px;padding:3px 12px;background:#15803d;border:none;border-radius:4px;color:#ecfdf5;cursor:pointer;font:inherit}
+.hg{display:grid;grid-template-columns:1fr 1.3fr;gap:22px;align-items:center}
+.pt{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:2px;aspect-ratio:1;background:#04140c;padding:4px;border-radius:4px}
+.pt i{background:#0b2a1a;border-radius:1px}.pt i.on{background:#4ade80;box-shadow:0 0 4px #4ade80}
+.og{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.og button{background:none;border:1px solid #14532d;border-radius:6px;padding:4px;cursor:pointer}
+.og button:hover:not(:disabled){border-color:#4ade80}
+.og button.good{border-color:#4ade80;background:#0b3a1f}.og button.bad{border-color:#ef4444;opacity:.4}
+.hf{margin-top:14px;text-align:right}.hf button{padding:6px 14px;background:none;border:1px solid #14532d;border-radius:6px;color:#86efac;cursor:pointer;font:inherit}
+@media (max-width:620px){.hg{grid-template-columns:1fr}.tg{max-width:180px;margin:auto}}
+@media (max-width:860px){
+  header.gnb .w{flex-direction:column;gap:0;align-items:flex-start}
+  ul.m{flex-wrap:wrap;justify-content:flex-start;width:100%}ul.m>li>a{padding:10px 12px}ul.m ul{display:none!important}
+  .quick ul{grid-template-columns:repeat(2,1fr)}.quick li{border-bottom:1px solid var(--line)}
+  .two,.cards{grid-template-columns:1fr}.stats .w{grid-template-columns:repeat(2,1fr)}
+  #system{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  #system aside{border-right:none;border-bottom:1px solid #1e293b;padding:14px}
+  #system .lg{margin-bottom:10px}#system .menu{display:flex;gap:6px;flex-wrap:wrap}
+  #system .menu button{width:auto;margin:0}#system .exit{margin-top:10px}
+}
+</style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div class="login-screen" id="login">
-  <div class="login-box">
-    <h1>KAISEI CONSTRUCTION</h1>
-    <p>SECURE ACCESS TERMINAL</p>
-    <input type="password" placeholder="ACCESS CODE" />
-    <button onclick="enterSystem()">AUTHENTICATE</button>
-  </div>
-</div>
-
-<!-- TERMINAL -->
-<div class="terminal" id="terminal"></div>
-
-<!-- DASHBOARD -->
-<div class="dashboard" id="dashboard">
-
-  <aside>
-    <div class="logo">KAISEI CONSTRUCTION</div>
-    <div class="menu">
-      <button onclick="show('overview')">📊 현황</button>
-      <button onclick="show('projects')">🏗 프로젝트</button>
-      <button onclick="show('personnel')">👤 인원</button>
-      <button onclick="show('security')">🔒 보안</button>
-    </div>
-  </aside>
+<!-- ===== PORTAL ===== -->
+<div id="site">
+  <div class="util"><div class="w"><button class="gate staff" type="button">🔒 직원 전용 사이트</button><a href="#">로그인</a><a href="#">회원가입</a><a href="#">사이트맵</a><a href="#">ENG</a></div></div>
+  <header class="gnb"><div class="w">
+    <a class="logo" href="#"><i>K</i><span>카이세이 연구소 관리시스템<small>KAISEI Applied Materials Institute</small></span></a>
+    <ul class="m">
+      <li><a href="#">연구소 소개</a><ul><li><a href="#">인사말</a></li><li><a href="#">조직도</a></li><li><a href="#">연혁</a></li><li><a href="#">오시는 길</a></li></ul></li>
+      <li><a href="#">연구 분야</a><ul><li><a href="#">금속 소재</a></li><li><a href="#">세라믹·코팅</a></li><li><a href="#">고분자 소재</a></li><li><a href="#">공정 자동화</a></li></ul></li>
+      <li><a href="#">시설 이용</a><ul><li><a href="#">장비 예약</a></li><li><a href="#">이용 절차</a></li><li><a href="#">이용 요금</a></li><li><a href="#">안전 수칙</a></li></ul></li>
+      <li><a href="#">정보제공</a><ul><li><a href="#">공지사항</a></li><li><a href="#">자료실</a></li><li><a href="#">연구 성과</a></li><li><a href="#">통계현황</a></li></ul></li>
+      <li><a href="#">고객지원</a><ul><li><a href="#">FAQ</a></li><li><a href="#">Q&amp;A</a></li><li><a href="#">원격지원</a></li><li><a href="#">제보 접수</a></li></ul></li>
+    </ul>
+  </div></header>
 
   <main>
+    <div class="banner"><div class="w">
+      <span class="tag">2026년 하반기 시설 이용 신청</span>
+      <h1>연구 장비와 시험 공정을 한곳에서 신청하세요.</h1>
+      <p>열처리, 코팅, 분석 장비 예약부터 시험 결과 확인까지 온라인으로 처리할 수 있습니다.</p>
+      <button class="gate cta" type="button">🔒 직원 전용 사이트 입장</button>
+    </div></div>
 
-    <!-- OVERVIEW -->
-    <section id="overview">
-      <h2>운영 현황</h2>
-      <div class="grid">
-        <div class="card"><h3>가동 공장</h3><p>12개</p></div>
-        <div class="card"><h3>활성 프로젝트</h3><p>10건</p></div>
-        <div class="card"><h3>설비 가동률</h3><p>96%</p></div>
-        <div class="card"><h3>내부 경고</h3><p>0건</p></div>
-      </div>
+    <div class="quick w"><ul>
+      <li><b>📝</b><span>장비 예약</span><small>시험동 장비 신청</small></li>
+      <li><b>🔬</b><span>시험 의뢰</span><small>소재 분석 의뢰</small></li>
+      <li><b>📄</b><span>성적서 출력</span><small>시험 성적서 발급</small></li>
+      <li><b>❓</b><span>자주 찾는 질문</span><small>FAQ 모음</small></li>
+      <li><b>✔</b><span>문서 진위 확인</span><small>발급 문서 조회</small></li>
+    </ul></div>
+
+    <div class="two w">
+      <div class="box"><h2>공지사항 <a href="#">전체보기</a></h2><ul>
+        <li><a href="#">신규 열처리 시험동 개소 및 장비 이용 안내</a><time>2026.11.12</time></li>
+        <li><a href="#">시험 성적서 위조 사례 발생에 따른 주의 안내</a><time>2026.11.05</time></li>
+        <li><a href="#">연말 시설 점검에 따른 장비 이용 일정 변경</a><time>2026.10.28</time></li>
+        <li><a href="#">2027년 학생 연구원 모집 공고</a><time>2026.08.21</time></li>
+      </ul></div>
+      <div class="box"><h2>자료실 <a href="#">전체보기</a></h2><ul>
+        <li><a href="#">2026년 시설 이용 업무편람</a><time>2026.11.01</time></li>
+        <li><a href="#">시험 의뢰서 양식 (개정)</a><time>2026.10.15</time></li>
+        <li><a href="#">코팅 수명 평가 연구 성과 요약집</a><time>2026.10.03</time></li>
+        <li><a href="#">연구 장비 안전 수칙 가이드라인</a><time>2026.09.10</time></li>
+      </ul></div>
+    </div>
+
+    <div class="cards w">
+      <div><h3>업무편람 다운로드</h3><p>시설 이용 절차와 시험 의뢰 방법을 안내하는 지침서입니다.</p></div>
+      <div><h3>온라인 교육</h3><p>장비 사용 전 필수 안전 교육을 온라인으로 수강하세요.</p></div>
+      <div><h3>공동연구 지원</h3><p>산학 공동연구와 기술 상담을 지원합니다.</p></div>
+      <div><h3>인력 채용</h3><p>연구원과 학생 연구원 채용 소식을 확인하세요.</p></div>
+    </div>
+
+    <div class="stats"><div class="w">
+      <div><b>12개</b><span>보유 시험동</span></div>
+      <div><b>186명</b><span>소속 연구원</span></div>
+      <div><b>342건</b><span>누적 연구과제</span></div>
+      <div><b>57건</b><span>등록 특허</span></div>
+    </div></div>
+
+    <div class="two w">
+      <div class="box"><h2>FAQ <a href="#">전체보기</a></h2><ul>
+        <li><a href="#">장비 예약은 얼마나 미리 해야 하나요?</a></li>
+        <li><a href="#">외부 기업도 시험을 의뢰할 수 있나요?</a></li>
+        <li><a href="#">시험 성적서는 얼마 만에 발급되나요?</a></li>
+      </ul></div>
+      <div class="box"><h2>Q&amp;A <a href="#">전체보기</a></h2><ul>
+        <li><a href="#">🔒 시험 일정 변경 문의</a><time>2026.11.25</time></li>
+        <li><a href="#">🔒 성적서 재발급 문의</a><time>2026.11.25</time></li>
+        <li><a href="#">🔒 공동연구 협약 절차 문의</a><time>2026.11.26</time></li>
+      </ul></div>
+    </div>
+  </main>
+
+  <footer class="f"><div class="w">
+    <div>
+      <p>개인정보처리방침 · 이용약관 · 이메일무단수집거부</p>
+      <p>공업지대 연구단지 3동 · 대표전화 0000-0000 · 팩스 00-0000-0000</p>
+      <p>© 2026 KAISEI APPLIED MATERIALS INSTITUTE. ALL RIGHTS RESERVED.</p>
+    </div>
+    <div><p>상담가능시간: 평일 09시~18시</p><p><button class="gate" type="button">직원 전용 로그인</button></p></div>
+  </div></footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <form id="mForm" autocomplete="off">
+    <h3 id="mTitle">접근 코드</h3><p id="mDesc">허가된 연구원만 입장할 수 있습니다.</p>
+    <input id="mInput" type="password" aria-label="접근 코드" />
+    <div class="err" id="mErr" role="alert"></div>
+    <div class="row"><button type="button" id="mCancel">취소</button><button class="go" type="submit">확인</button></div>
+  </form>
+</div>
+<div id="hack" role="dialog" aria-modal="true" aria-labelledby="hTitle"><div class="hbox">
+  <div class="hh"><b id="hTitle"></b><span id="hRound"></span></div>
+  <div class="tb"><i id="hBar"></i></div><div class="hm" id="hMsg" role="status"></div>
+  <div class="hg"><div class="tg" id="hTarget"></div><div class="og" id="hOpts"></div></div>
+  <div class="hf"><button type="button" id="hCancel">취소</button></div>
+</div></div>
+<div id="terminal" title="클릭하면 건너뜁니다"></div>
+
+<!-- ===== INTERNAL SYSTEM ===== -->
+<div id="system">
+  <aside>
+    <div class="lg">KAISEI SYSTEM</div>
+    <div class="menu">
+      <button data-t="overview" class="on">📊 현황</button>
+      <button data-t="projects">🏗 프로젝트</button>
+      <button data-t="personnel">👤 인원</button>
+      <button data-t="security">🔒 보안</button>
+    </div>
+    <div class="menu exit"><button id="exitBtn">⏻ 나가기</button></div>
+  </aside>
+  <main>
+    <section id="overview" class="on"><h2>운영 현황</h2>
+      <div class="grid" id="ovCards"></div>
+      <h3>최근 경고 이벤트</h3><div class="tw" id="ovWarn"></div>
     </section>
-
-    <!-- PROJECTS -->
-    <section id="projects" style="display:none">
-      <h2>프로젝트 목록</h2>
-      <table>
-        <tr><th>코드</th><th>위치</th><th>명</th></tr>
-        <tr><td>RX-A17</td><td>공업지대</td><td>사쿠라 중공업</td></tr>
-        <tr><td>QF-9X</td><td>공업지대</td><td>후지야마 정밀</td></tr>
-        <tr><td>LM-204</td><td>공업지대</td><td>아오이 전기제작소</td></tr>
-        <tr><td>NT-77B</td><td>공업지대</td><td>미나토 기계공업</td></tr>
-        <tr><td>VX-Δ3</td><td>공업지대</td><td>호시노 자동화</td></tr>
-        <tr><td>HZ-88R</td><td>공업지대</td><td>토키와 금속</td></tr>
-        <tr><td>PL-0M</td><td>공업지대</td><td>카스미 화학플랜트</td></tr>
-        <tr><td>CR-Σ1</td><td>공업지대</td><td>시라누이 에너지</td></tr>
-        <tr><td>AX-991</td><td>공업지대</td><td>히카리 로보틱스</td></tr>
-
-        <!-- SECRET PROJECT -->
-        <tr class="secret" onclick="openSecret()">
-          <td>MN-001</td><td>공업지대</td><td>안달모터즈</td>
-        </tr>
-      </table>
-    </section>
-
-    <!-- PERSONNEL -->
-    <section id="personnel" style="display:none">
-      <h2>핵심 인원</h2>
-      <div class="grid">
-        <div class="card"><h3>대표이사</h3><p>카이세이 류이치 (皆成 隆一)</p></div>
-        <div class="card"><h3>기술총괄</h3><p>타치바나 소라 (橘 空)</p></div>
-        <div class="card"><h3>보안책임</h3><p>쿠로다 미사키 (黒田 美咲)</p></div>
-        <div class="card"><h3>공정관리</h3><p>이시카와 렌 (石川 蓮)</p></div>
-      </div>
-    </section>
-
-    <!-- SECURITY -->
-    <section id="security" style="display:none">
-      <h2>보안 로그</h2>
-      <table>
-        <tr><th>시간</th><th>구역</th><th>이벤트</th></tr>
-        <tr><td>09:12</td><td>MN-001</td><td>권한 확인 요청</td></tr>
-        <tr><td>03:44</td><td>PL-0M</td><td>전력 변동 감지</td></tr>
-      </table>
-    </section>
-
+    <section id="projects"><h2>프로젝트 목록</h2><div class="tw" id="prTable"></div></section>
+    <section id="personnel"><h2>핵심 인원</h2><div class="grid" id="peCards"></div></section>
+    <section id="security"><h2>보안 로그</h2><div class="grid" id="seSum"></div><h3>전체 로그</h3><div class="tw" id="seTable"></div></section>
   </main>
 </div>
 
+<div id="viewer"><div>CONFIDENTIAL IMAGE — ANDAL MOTORS</div><img id="vImg" alt="기밀 지도" /><button id="vClose">닫기</button></div>
+
 <script>
-  const terminal = document.getElementById('terminal');
+/* ---- 설정 ---- */
+const SECRET_IMG='map.png';
+/* 해킹 게임 난이도: rounds=맞춰야 할 횟수, secs=제한 시간(초), n=패턴 크기(n×n), diff=오답 후보와 다른 칸 수(작을수록 어려움) */
+const GAME_MAIN={rounds:3,secs:25,n:6,diff:2};
+const GAME_SECRET={rounds:4,secs:22,n:7,diff:1};
 
-  function runTerminal(lines, callback) {
-    terminal.style.display = 'block';
-    terminal.textContent = '';
+/* ---- 데이터 (코드|구역|이름|분야|상태|진행률) ---- */
+const PROJECTS=`RX-A17|A|사쿠라 중공업|중공업|진행|72
+QF-9X|A|후지야마 정밀|정밀가공|진행|58
+LM-204|B|아오이 전기제작소|전장|점검|84
+NT-77B|B|미나토 기계공업|기계|진행|41
+VX-Δ3|C|호시노 자동화|자동화|진행|66
+HZ-88R|C|토키와 금속|금속|점검|90
+PL-0M|D|카스미 화학플랜트|화학|진행|53
+CR-Σ1|D|시라누이 에너지|에너지|진행|37
+AX-991|A|히카리 로보틱스|로보틱스|진행|77
+AB-12C|A|아사히 조선기계|중공업|완료|100
+MB-310|B|모리타 베어링|정밀가공|진행|62
+SM-55D|B|아키바 반도체장비|반도체|진행|48
+NP-206|C|나가이 수지가공|고분자|보류|25
+YK-47|C|요시다 공작기계|기계|진행|70
+SD-18F|D|센다이 주조소|금속|완료|100
+NH-732|A|니시노 유압|유압|진행|33
+OE-94|B|오하라 전선|전장|진행|81
+TH-61A|C|다케다 열처리|열처리|점검|59
+IP-880|D|이와모토 도금|표면처리|진행|46
+KL-305|A|코마츠 물류설비|물류|진행|68
+SR-27X|B|스즈키 압연|금속|보류|19
+HB-4Z|D|하시모토 배터리|에너지|진행|52
+YE-19|C|야마시타 환경설비|환경|완료|100`.split('\n').map(r=>r.split('|'));
 
-    let i = 0;
-    const timer = setInterval(() => {
-      terminal.textContent += lines[i] + '\n';
-      terminal.scrollTop = terminal.scrollHeight;
-      i++;
-      if (i >= lines.length) {
-        clearInterval(timer);
-        setTimeout(callback, 800);
-      }
-    }, 300);
+const PEOPLE=`대표이사|카이세이 류이치|皆成 隆一|경영|전체 사업 총괄
+기술총괄|타치바나 소라|橘 空|기술본부|연구·생산 기술 총괄
+보안책임|쿠로다 미사키|黒田 美咲|보안팀|출입·정보 보안 총괄
+공정관리|이시카와 렌|石川 蓮|생산팀|전 공장 공정 일정 관리
+재무책임|마츠모토 아키라|松本 明|재무팀|예산·정산 관리
+인사총괄|사이토 유나|斎藤 結菜|인사팀|채용·교육 관리
+품질관리|하야시 켄타|林 健太|품질팀|시험·검사 기준 관리
+설비보전|야마다 다이스케|山田 大輔|설비팀|설비 점검·보수
+연구개발|미야자키 하루카|宮崎 遥|연구개발팀|신소재 과제 책임
+안전관리|오카모토 쇼|岡本 翔|안전팀|작업 안전·교육
+물류총괄|나카무라 리코|中村 莉子|물류팀|자재 입출고 관리
+IT인프라|코바야시 타쿠미|小林 拓海|정보시스템팀|서버·네트워크 운영
+법무·계약|후지타 사야|藤田 紗耶|법무팀|계약·특허 검토
+대외협력|이노우에 하루토|井上 陽斗|협력팀|고객사·기관 협력
+전력설비|시마다 고|島田 剛|설비팀|수전·발전 설비 관리
+환경관리|아라이 나오|新井 菜央|환경팀|배출·폐기물 관리`.split('\n').map(r=>r.split('|'));
+
+const LOGS=`11-26 09:12|MN-001|주의|권한 확인 요청
+11-26 08:47|정문|정보|출입 인증 완료 (직원 142명)
+11-26 07:30|서버실|정보|정기 백업 완료
+11-26 03:44|PL-0M|경고|전력 변동 감지
+11-25 23:10|네트워크|주의|외부 접속 시도 3건 차단
+11-25 21:05|CR-Σ1|정보|냉각 계통 점검 완료
+11-25 18:22|B구역|주의|출입증 미태그 통과 1건
+11-25 16:40|HZ-88R|정보|설비 정기 점검 종료
+11-25 14:15|AX-991|경고|로봇 암 충돌 센서 오작동
+11-25 11:03|서버실|정보|보안 패치 적용
+11-25 09:58|MN-001|주의|비인가 단말 접속 거부
+11-24 22:31|네트워크|경고|비정상 트래픽 급증 탐지
+11-24 19:47|QF-9X|정보|CCTV 점검 완료
+11-24 15:20|정문|주의|방문자 신원 확인 지연
+11-24 12:05|PL-0M|정보|가스 누출 센서 교정
+11-24 06:50|VX-Δ3|정보|야간 순찰 이상 없음
+11-23 20:14|서버실|주의|로그인 5회 실패, 계정 잠금
+11-23 13:36|LM-204|정보|화재 감지기 시험
+11-23 02:18|CR-Σ1|경고|비상 발전기 자동 기동
+11-22 17:42|NT-77B|정보|출입 권한 갱신
+11-22 10:09|MN-001|주의|권한 확인 요청
+11-22 08:00|전 구역|정보|주간 보안 점검 시작`.split('\n').map(r=>r.split('|'));
+
+/* ---- 렌더링 ---- */
+const $=id=>document.getElementById(id);
+const tbl=(h,rows)=>`<table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows}</table>`;
+const lv=l=>`<span class="lv ${l}">${l}</span>`;
+const logRow=r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${lv(r[2])}</td><td>${r[3]}</td></tr>`;
+const cnt=l=>LOGS.filter(r=>r[2]===l).length;
+const card=(t,v,s='')=>`<div class="card"><h3>${t}</h3><p>${v}</p><small>${s}</small></div>`;
+
+const active=PROJECTS.filter(p=>p[4]!=='완료').length;
+$('ovCards').innerHTML=card('가동 공장','12개','A~D 구역')+card('활성 프로젝트',active+'건','전체 '+(PROJECTS.length+1)+'건')
+  +card('설비 가동률','96%','전일 대비 -1%')+card('내부 경고',cnt('경고')+'건','최근 5일 기준')+card('총 인원','186명','핵심 인원 '+PEOPLE.length+'명');
+$('ovWarn').innerHTML=tbl(['시간','구역','등급','이벤트'],LOGS.filter(r=>r[2]==='경고').map(logRow).join(''));
+
+$('prTable').innerHTML=tbl(['코드','구역','명','분야','상태','진행률'],
+  PROJECTS.map(p=>`<tr><td>${p[0]}</td><td>${p[1]}구역</td><td>${p[2]}</td><td>${p[3]}</td><td class="st ${p[4]}">${p[4]}</td><td><span class="bar"><i style="width:${p[5]}%"></i></span>${p[5]}%</td></tr>`).join('')
+  +`<tr class="secret" id="secretRow"><td>MN-001</td><td>—</td><td>안달모터즈</td><td>자동차</td><td class="st">비공개</td><td>접근 제한</td></tr>`);
+
+$('peCards').innerHTML=PEOPLE.map(p=>card(p[0]+' · '+p[3],p[1],p[2]+' — '+p[4])).join('');
+$('seSum').innerHTML=card('정보',cnt('정보')+'건')+card('주의',cnt('주의')+'건')+card('경고',cnt('경고')+'건')+card('MN-001 접근 시도',LOGS.filter(r=>r[1]==='MN-001').length+'건');
+$('seTable').innerHTML=tbl(['시간','구역','등급','이벤트'],LOGS.map(logRow).join(''));
+
+/* ---- 코드 입력창 ---- */
+const modal=$('modal'),mInput=$('mInput'),mErr=$('mErr'),form=$('mForm');
+let cur=null,last=null;
+function askCode(title,desc,expected,ok){cur={expected,ok};last=document.activeElement;
+  $('mTitle').textContent=title;$('mDesc').textContent=desc;mInput.value='';mErr.textContent='';
+  modal.classList.add('open');mInput.focus();}
+const closeModal=()=>{modal.classList.remove('open');if(last)last.focus();};
+form.addEventListener('submit',e=>{e.preventDefault();
+  if(mInput.value===cur.expected){const f=cur.ok;closeModal();f();}
+  else{mErr.textContent='코드가 일치하지 않습니다. 다시 입력하세요.';form.classList.remove('shake');void form.offsetWidth;form.classList.add('shake');mInput.select();}});
+$('mCancel').onclick=closeModal;
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();stopHack();$('viewer').classList.remove('open');}});
+
+/* ---- 터미널 연출 ---- */
+const term=$('terminal');
+function runTerminal(lines,done){term.style.display='block';term.textContent='';let i=0,fin=false;
+  const finish=()=>{if(fin)return;fin=true;clearInterval(t);term.style.display='none';done();};
+  const t=setInterval(()=>{term.textContent+=lines[i++]+'\n';if(i>=lines.length){clearInterval(t);setTimeout(finish,700);}},300);
+  term.onclick=finish;}
+
+/* ---- 해킹 미니게임: 지문 대조처럼 같은 패턴 찾기 ---- */
+let hTimer=null;
+function stopHack(){clearInterval(hTimer);$('hack').classList.remove('open');}
+function startHack(title,cfg,onWin){
+  const {rounds,secs,n,diff}=cfg;let r=0,t=secs,locked=false;
+  const msg=$('hMsg');$('hTitle').textContent=title;$('hack').classList.add('open');
+  const pt=b=>`<div class="pt" style="--n:${n}">${b.map(v=>`<i class="${v?'on':''}"></i>`).join('')}</div>`;
+  function next(){
+    locked=false;$('hRound').textContent=`패턴 ${r+1} / ${rounds}`;
+    msg.textContent='왼쪽 패턴과 완전히 같은 조각을 고르세요. 오답은 시간 -4초.';
+    const target=Array.from({length:n*n},()=>Math.random()<.45?1:0),key=target.join(''),seen=new Set([key]),opts=[target];
+    while(opts.length<8){const b=target.slice();for(let k=0;k<diff;k++)b[Math.floor(Math.random()*b.length)]^=1;const q=b.join('');if(!seen.has(q)){seen.add(q);opts.push(b);}}
+    opts.sort(()=>Math.random()-.5);
+    $('hTarget').innerHTML=pt(target);
+    $('hOpts').innerHTML=opts.map(b=>`<button type="button" data-ok="${b.join('')===key?1:0}" aria-label="후보 패턴">${pt(b)}</button>`).join('');
   }
+  $('hOpts').onclick=e=>{const b=e.target.closest('button');if(!b||locked)return;
+    if(b.dataset.ok==='1'){locked=true;b.classList.add('good');r++;
+      if(r>=rounds){msg.textContent='>> 우회 성공';clearInterval(hTimer);setTimeout(()=>{stopHack();onWin();},600);}
+      else setTimeout(next,450);}
+    else{b.classList.add('bad');b.disabled=true;t=Math.max(0,t-4);msg.textContent='>> 불일치 — 시간 -4초';}};
+  $('hCancel').onclick=stopHack;
+  clearInterval(hTimer);
+  hTimer=setInterval(()=>{if(locked)return;t-=.1;
+    $('hBar').style.width=Math.max(0,t/secs*100)+'%';$('hBar').style.background=t/secs<.3?'#ef4444':'#4ade80';
+    if(t<=0){clearInterval(hTimer);locked=true;msg.innerHTML='>> ACCESS DENIED — 시간 초과 <button type="button" id="hRetry">다시 시도</button>';
+      $('hRetry').onclick=()=>startHack(title,cfg,onWin);}},100);
+  next();
+}
 
-  /* FIRST LOGIN PASSWORD */
-  function enterSystem() {
-    const pw = document.querySelector('#login input').value;
-    if (pw !== 'kaisei') return alert('ACCESS DENIED');
+/* ---- 직원 전용 입구: 상단 바, 배너, 푸터의 버튼 모두 같은 동작 ---- */
+document.querySelectorAll('.gate').forEach(b=>b.onclick=()=>startHack('직원 전용 보안 해제',GAME_MAIN,()=>
+  runTerminal(['>> 시스템 무결성 확인...','>> 사용자 키 인증 중...','>> 데이터 링크 동기화...','>> 접근 권한 확인 완료','>> 입장 승인'],()=>{
+    $('site').style.display='none';$('system').style.display='grid';document.title='KAISEI SYSTEM';})));
 
-    document.getElementById('login').style.display = 'none';
+document.querySelectorAll('#system .menu button[data-t]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#system section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  document.querySelectorAll('#system .menu button[data-t]').forEach(x=>x.classList.toggle('on',x===b));});
+$('exitBtn').onclick=()=>{$('system').style.display='none';$('site').style.display='flex';document.title='카이세이 연구소 관리시스템';scrollTo(0,0);};
 
-    runTerminal([
-      '>> 시스템 무결성 확인...',
-      '>> 사용자 키 인증 중...',
-      '>> 데이터 링크 동기화...',
-      '>> 접근 권한 확인 완료',
-      '>> 입장 승인'
-    ], () => {
-      terminal.style.display = 'none';
-      document.getElementById('dashboard').style.display = 'grid';
-    });
-  }
-
-  function show(id) {
-    document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
-    document.getElementById(id).style.display = 'block';
-  }
-
-  /* SECRET PROJECT PASSWORD */
-  function openSecret() {
-    const pw = prompt('MN-001 ACCESS CODE');
-    if (pw !== 'akghfhqk') return alert('ACCESS DENIED');
-
-    runTerminal([
-      '>> MN-001 보안 모듈 활성화...',
-      '>> 2차 인증 토큰 검증...',
-      '>> 내부 격리 구역 연결...',
-      '>> 암호 해제 완료',
-      '>> 접근 승인'
-    ], () => {
-      // 🔒 비밀 이미지 뷰어 오버레이
-      const viewer = document.createElement('div');
-      viewer.style.position = 'fixed';
-      viewer.style.inset = '0';
-      viewer.style.background = 'rgba(0,0,0,0.95)';
-      viewer.style.display = 'flex';
-      viewer.style.flexDirection = 'column';
-      viewer.style.alignItems = 'center';
-      viewer.style.justifyContent = 'center';
-      viewer.style.zIndex = '9999';
-
-      const title = document.createElement('div');
-      title.textContent = 'CONFIDENTIAL IMAGE — ANDAL MOTORS';
-      title.style.color = '#4ade80';
-      title.style.marginBottom = '12px';
-      title.style.fontSize = '18px';
-
-      const img = document.createElement('img');
-      // ✅ 아래 URL을 원하는 이미지 주소로 교체하면 됩니다
-      img.src = 'MAP･전체지도.png';
-      img.style.maxWidth = '90%';
-      img.style.maxHeight = '70%';
-      img.style.border = '2px solid #4ade80';
-      img.style.borderRadius = '6px';
-
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '닫기';
-      closeBtn.style.marginTop = '14px';
-      closeBtn.style.padding = '8px 16px';
-      closeBtn.style.background = '#15803d';
-      closeBtn.style.border = 'none';
-      closeBtn.style.borderRadius = '6px';
-      closeBtn.style.color = '#ecfdf5';
-      closeBtn.style.cursor = 'pointer';
-      closeBtn.onclick = () => viewer.remove();
-
-      viewer.appendChild(title);
-      viewer.appendChild(img);
-      viewer.appendChild(closeBtn);
-      document.body.appendChild(viewer);
-    });
-  }
+/* ---- 비밀 프로젝트 MN-001 ---- */
+$('secretRow').onclick=()=>startHack('MN-001 2차 보안 해제',GAME_SECRET,()=>
+  runTerminal(['>> MN-001 보안 모듈 활성화...','>> 2차 인증 토큰 검증...','>> 내부 격리 구역 연결...','>> 암호 해제 완료','>> 접근 승인'],
+  ()=>{$('vImg').src=SECRET_IMG;$('viewer').classList.add('open');}));
+$('vClose').onclick=()=>$('viewer').classList.remove('open');
 </script>
-
 </body>
 </html>
