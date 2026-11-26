@@ -122,7 +122,21 @@ footer.f .gate{background:none;border:none;font:inherit;color:#fff;cursor:pointe
 .og button:hover:not(:disabled){border-color:#4ade80}
 .og button.good{border-color:#4ade80;background:#0b3a1f}.og button.bad{border-color:#ef4444;opacity:.4}
 .hf{margin-top:14px;text-align:right}.hf button{padding:6px 14px;background:none;border:1px solid #14532d;border-radius:6px;color:#86efac;cursor:pointer;font:inherit}
-@media (max-width:620px){.hg{grid-template-columns:1fr}.tg{max-width:180px;margin:auto}}
+.nm{display:grid;gap:8px}
+.nm button,.cg button{padding:14px 0;background:#04140c;border:1px solid #14532d;border-radius:6px;color:#4ade80;font:700 1.1rem Consolas,monospace;cursor:pointer}
+.nm button:hover:not(:disabled),.cg button:hover:not(:disabled){border-color:#4ade80}
+.nm button.good,.cg button.good{background:#0b3a1f;border-color:#4ade80}.cg button.bad{opacity:.4;border-color:#ef4444}
+.cg{grid-template-columns:repeat(4,1fr)}
+.cd{font:700 2.4rem Consolas,monospace;text-align:center;letter-spacing:6px;margin-bottom:16px;text-shadow:0 0 8px #4ade80}
+.tr{position:relative;height:46px;background:#04140c;border:1px solid #14532d;border-radius:6px;margin:30px 0 22px;overflow:hidden}
+.zn{position:absolute;top:0;bottom:0;background:rgba(74,222,128,.3);border-inline:2px solid #4ade80}
+.mk{position:absolute;top:0;bottom:0;width:6px;margin-left:-3px;background:#fff;box-shadow:0 0 8px #fff}
+.sm{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:320px;margin:auto}
+.sm button{height:90px;border:2px solid var(--c);border-radius:10px;cursor:pointer;opacity:.3;background:var(--c)}
+.sm .s0{--c:#22c55e}.sm .s1{--c:#3b82f6}.sm .s2{--c:#eab308}.sm .s3{--c:#ef4444}
+.sm button.lit{opacity:1;box-shadow:0 0 18px var(--c)}
+.hf button.go{background:#15803d;color:#ecfdf5;border-color:#15803d;padding:10px 32px;font-weight:700}
+@media (max-width:620px){.hg{grid-template-columns:1fr}.tg{max-width:180px;margin:auto}.cd{font-size:1.8rem}}
 @media (max-width:860px){
   header.gnb .w{flex-direction:column;gap:0;align-items:flex-start}
   ul.m{flex-wrap:wrap;justify-content:flex-start;width:100%}ul.m>li>a{padding:10px 12px}ul.m ul{display:none!important}
@@ -231,7 +245,7 @@ footer.f .gate{background:none;border:none;font:inherit;color:#fff;cursor:pointe
 <div id="hack" role="dialog" aria-modal="true" aria-labelledby="hTitle"><div class="hbox">
   <div class="hh"><b id="hTitle"></b><span id="hRound"></span></div>
   <div class="tb"><i id="hBar"></i></div><div class="hm" id="hMsg" role="status"></div>
-  <div class="hg"><div class="tg" id="hTarget"></div><div class="og" id="hOpts"></div></div>
+  <div id="hArena"></div>
   <div class="hf"><button type="button" id="hCancel">취소</button></div>
 </div></div>
 <div id="terminal" title="클릭하면 건너뜁니다"></div>
@@ -264,9 +278,8 @@ footer.f .gate{background:none;border:none;font:inherit;color:#fff;cursor:pointe
 <script>
 /* ---- 설정 ---- */
 const SECRET_IMG='map.png';
-/* 해킹 게임 난이도: rounds=맞춰야 할 횟수, secs=제한 시간(초), n=패턴 크기(n×n), diff=오답 후보와 다른 칸 수(작을수록 어려움) */
-const GAME_MAIN={rounds:3,secs:25,n:6,diff:2};
-const GAME_SECRET={rounds:4,secs:22,n:7,diff:1};
+/* 해킹 게임 난이도: 1=쉬움, 2=조금 어려움 (맞출 횟수 +1, 제한 시간 -10초). 게임 5종 중 하나가 랜덤으로 나옵니다 */
+const LV_MAIN=1, LV_SECRET=2;
 
 /* ---- 데이터 (코드|구역|이름|분야|상태|진행률) ---- */
 const PROJECTS=`RX-A17|A|사쿠라 중공업|중공업|진행|72
@@ -375,38 +388,84 @@ function runTerminal(lines,done){term.style.display='block';term.textContent='';
   const t=setInterval(()=>{term.textContent+=lines[i++]+'\n';if(i>=lines.length){clearInterval(t);setTimeout(finish,700);}},300);
   term.onclick=finish;}
 
-/* ---- 해킹 미니게임: 지문 대조처럼 같은 패턴 찾기 ---- */
-let hTimer=null;
-function stopHack(){clearInterval(hTimer);$('hack').classList.remove('open');}
-function startHack(title,cfg,onWin){
-  const {rounds,secs,n,diff}=cfg;let r=0,t=secs,locked=false;
-  const msg=$('hMsg');$('hTitle').textContent=title;$('hack').classList.add('open');
+/* ---- 해킹 미니게임 5종 (랜덤) ---- */
+let hTimer=null,hGen=0,hLast=-1,hPause=false;
+const shuf=a=>a.sort(()=>Math.random()-.5);
+function stopHack(){hGen++;clearInterval(hTimer);$('hack').classList.remove('open');}
+$('hCancel').onclick=stopHack;
+
+/* 1) 지문 대조: 왼쪽과 똑같은 패턴 고르기 */
+function gPattern(a,c){const n=5,rounds=c.lv>1?4:3;let r=0;
   const pt=b=>`<div class="pt" style="--n:${n}">${b.map(v=>`<i class="${v?'on':''}"></i>`).join('')}</div>`;
-  function next(){
-    locked=false;$('hRound').textContent=`패턴 ${r+1} / ${rounds}`;
-    msg.textContent='왼쪽 패턴과 완전히 같은 조각을 고르세요. 오답은 시간 -4초.';
-    const target=Array.from({length:n*n},()=>Math.random()<.45?1:0),key=target.join(''),seen=new Set([key]),opts=[target];
-    while(opts.length<8){const b=target.slice();for(let k=0;k<diff;k++)b[Math.floor(Math.random()*b.length)]^=1;const q=b.join('');if(!seen.has(q)){seen.add(q);opts.push(b);}}
-    opts.sort(()=>Math.random()-.5);
-    $('hTarget').innerHTML=pt(target);
-    $('hOpts').innerHTML=opts.map(b=>`<button type="button" data-ok="${b.join('')===key?1:0}" aria-label="후보 패턴">${pt(b)}</button>`).join('');
-  }
-  $('hOpts').onclick=e=>{const b=e.target.closest('button');if(!b||locked)return;
-    if(b.dataset.ok==='1'){locked=true;b.classList.add('good');r++;
-      if(r>=rounds){msg.textContent='>> 우회 성공';clearInterval(hTimer);setTimeout(()=>{stopHack();onWin();},600);}
-      else setTimeout(next,450);}
-    else{b.classList.add('bad');b.disabled=true;t=Math.max(0,t-4);msg.textContent='>> 불일치 — 시간 -4초';}};
-  $('hCancel').onclick=stopHack;
+  function next(){c.set(`왼쪽과 똑같은 패턴을 고르세요 (${r+1}/${rounds})`);
+    const tg=Array.from({length:n*n},()=>Math.random()<.45?1:0),key=tg.join(''),seen=new Set([key]),o=[tg];
+    while(o.length<6){const b=tg.slice();for(let k=0;k<2;k++)b[Math.floor(Math.random()*b.length)]^=1;const q=b.join('');if(!seen.has(q)){seen.add(q);o.push(q===key?tg:b);}}
+    shuf(o);
+    a.innerHTML=`<div class="hg"><div class="tg">${pt(tg)}</div><div class="og" style="grid-template-columns:repeat(3,1fr)">${o.map(b=>`<button type="button" data-ok="${b.join('')===key?1:0}" aria-label="후보">${pt(b)}</button>`).join('')}</div></div>`;
+    a.querySelector('.og').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!c.alive())return;
+      if(b.dataset.ok==='1'){b.classList.add('good');if(++r>=rounds)c.win();else setTimeout(()=>c.alive()&&next(),400);}
+      else{b.classList.add('bad');b.disabled=true;c.pen(3);}};}
+  next();}
+
+/* 2) 숫자 순서: 1부터 차례대로 누르기 */
+function gNumbers(a,c){const cnt=c.lv>1?16:12;let nx=1;c.set('1부터 순서대로 누르세요');
+  a.innerHTML=`<div class="nm" style="grid-template-columns:repeat(4,1fr)">${shuf(Array.from({length:cnt},(_,i)=>i+1)).map(v=>`<button type="button">${v}</button>`).join('')}</div>`;
+  a.querySelector('.nm').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!c.alive())return;
+    if(+b.textContent===nx){b.classList.add('good');b.disabled=true;if(++nx>cnt)c.win();else c.set(`다음 숫자: ${nx}`);}else c.pen(2);};}
+
+/* 3) 코드 일치: 위에 표시된 코드와 같은 것 고르기 */
+function gCode(a,c){const rounds=c.lv>1?5:4,H='ABCDEF0123456789',rc=()=>H[Math.floor(Math.random()*16)];let r=0;
+  function next(){c.set(`표시된 코드와 같은 버튼을 누르세요 (${r+1}/${rounds})`);
+    const tg=Array.from({length:4},rc).join(''),seen=new Set([tg]),o=[tg];
+    while(o.length<8){const ch=tg.split('');ch[Math.floor(Math.random()*4)]=rc();const q=ch.join('');if(!seen.has(q)){seen.add(q);o.push(q);}}
+    a.innerHTML=`<div class="cd">${tg}</div><div class="og cg">${shuf(o).map(v=>`<button type="button" data-ok="${v===tg?1:0}">${v}</button>`).join('')}</div>`;
+    a.querySelector('.cg').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!c.alive())return;
+      if(b.dataset.ok==='1'){b.classList.add('good');if(++r>=rounds)c.win();else setTimeout(()=>c.alive()&&next(),400);}
+      else{b.classList.add('bad');b.disabled=true;c.pen(3);}};}
+  next();}
+
+/* 4) 타이밍: 움직이는 표시가 초록 구간에 있을 때 정지 */
+function gTiming(a,c){const need=c.lv>1?4:3,W=28;let hit=0,zl=0,x=0;
+  a.innerHTML=`<div class="tr"><i class="zn"></i><b class="mk"></b></div><div class="hf" style="text-align:center"><button type="button" class="go" id="hStop">정지!</button></div>`;
+  const zn=a.querySelector('.zn'),mk=a.querySelector('.mk'),t0=performance.now();
+  const zone=()=>{zl=Math.random()*(100-W);zn.style.left=zl+'%';zn.style.width=W+'%';c.set(`흰 막대가 초록 구간에 있을 때 정지! (${hit}/${need})`);};
+  zone();
+  const iv=setInterval(()=>{if(!c.alive())return clearInterval(iv);x=(Math.sin((performance.now()-t0)/440)+1)/2*100;mk.style.left=x+'%';},16);
+  $('hStop').onclick=()=>{if(!c.alive())return;
+    if(x>=zl&&x<=zl+W){if(++hit>=need){clearInterval(iv);c.win();}else zone();}else c.pen(3);};}
+
+/* 5) 신호 기억: 깜빡이는 색 순서를 따라 누르기 */
+function gMemory(a,c){const len=c.lv>1?5:3,seq=Array.from({length:len},()=>Math.floor(Math.random()*4));let pos=0,input=false;
+  a.innerHTML=`<div class="sm">${[0,1,2,3].map(i=>`<button type="button" class="s${i}" data-i="${i}" aria-label="신호 ${i+1}"></button>`).join('')}</div>`;
+  const bs=[...a.querySelectorAll('.sm button')],flash=(i,ms)=>{bs[i].classList.add('lit');setTimeout(()=>bs[i].classList.remove('lit'),ms);};
+  function play(){input=false;pos=0;c.pause(true);c.set('>> 깜빡이는 순서를 기억하세요');let i=0;
+    const step=()=>{if(!c.alive())return;if(i>=seq.length){input=true;c.pause(false);c.set('같은 순서로 눌러 보세요');return;}flash(seq[i++],450);setTimeout(step,700);};
+    setTimeout(step,700);}
+  bs.forEach(b=>b.onclick=()=>{if(!input||!c.alive())return;const i=+b.dataset.i;flash(i,200);
+    if(i===seq[pos]){if(++pos>=seq.length)c.win();}
+    else{input=false;c.pen(2,'>> 순서 오류 — 다시 보여줍니다');setTimeout(()=>c.alive()&&play(),900);}});
+  play();}
+
+const GAMES=[['지문 대조',gPattern],['숫자 순서',gNumbers],['코드 일치',gCode],['타이밍',gTiming],['신호 기억',gMemory]];
+
+function startHack(title,lv,onWin){
+  hGen++;const gen=hGen;let k;do{k=Math.floor(Math.random()*GAMES.length);}while(k===hLast);hLast=k;
+  const [name,run]=GAMES[k],secs=lv>1?28:35,msg=$('hMsg'),arena=$('hArena');let t=secs,done=false;hPause=false;
+  $('hTitle').textContent=title;$('hRound').textContent=name;arena.innerHTML='';$('hack').classList.add('open');
+  const c={lv,alive:()=>!done&&gen===hGen,set:m=>{msg.textContent=m;},pause:p=>{hPause=p;},
+    pen(s,m){t=Math.max(0,t-s);msg.textContent=m||`>> 오류 — 시간 -${s}초`;},
+    win(){if(done)return;done=true;clearInterval(hTimer);msg.textContent='>> 우회 성공';setTimeout(()=>{if(gen===hGen){stopHack();onWin();}},700);}};
   clearInterval(hTimer);
-  hTimer=setInterval(()=>{if(locked)return;t-=.1;
+  hTimer=setInterval(()=>{if(done||hPause)return;t-=.1;
     $('hBar').style.width=Math.max(0,t/secs*100)+'%';$('hBar').style.background=t/secs<.3?'#ef4444':'#4ade80';
-    if(t<=0){clearInterval(hTimer);locked=true;msg.innerHTML='>> ACCESS DENIED — 시간 초과 <button type="button" id="hRetry">다시 시도</button>';
-      $('hRetry').onclick=()=>startHack(title,cfg,onWin);}},100);
-  next();
+    if(t<=0){done=true;clearInterval(hTimer);arena.innerHTML='';
+      msg.innerHTML='>> ACCESS DENIED — 시간 초과 <button type="button" id="hRetry">다시 시도</button>';
+      $('hRetry').onclick=()=>startHack(title,lv,onWin);}},100);
+  run(arena,c);
 }
 
 /* ---- 직원 전용 입구: 상단 바, 배너, 푸터의 버튼 모두 같은 동작 ---- */
-document.querySelectorAll('.gate').forEach(b=>b.onclick=()=>startHack('직원 전용 보안 해제',GAME_MAIN,()=>
+document.querySelectorAll('.gate').forEach(b=>b.onclick=()=>startHack('직원 전용 보안 해제',LV_MAIN,()=>
   runTerminal(['>> 시스템 무결성 확인...','>> 사용자 키 인증 중...','>> 데이터 링크 동기화...','>> 접근 권한 확인 완료','>> 입장 승인'],()=>{
     $('site').style.display='none';$('system').style.display='grid';document.title='KAISEI SYSTEM';})));
 
@@ -416,7 +475,7 @@ document.querySelectorAll('#system .menu button[data-t]').forEach(b=>b.onclick=(
 $('exitBtn').onclick=()=>{$('system').style.display='none';$('site').style.display='flex';document.title='카이세이 연구소 관리시스템';scrollTo(0,0);};
 
 /* ---- 비밀 프로젝트 MN-001 ---- */
-$('secretRow').onclick=()=>startHack('MN-001 2차 보안 해제',GAME_SECRET,()=>
+$('secretRow').onclick=()=>startHack('MN-001 2차 보안 해제',LV_SECRET,()=>
   runTerminal(['>> MN-001 보안 모듈 활성화...','>> 2차 인증 토큰 검증...','>> 내부 격리 구역 연결...','>> 암호 해제 완료','>> 접근 승인'],
   ()=>{$('vImg').src=SECRET_IMG;$('viewer').classList.add('open');}));
 $('vClose').onclick=()=>$('viewer').classList.remove('open');
